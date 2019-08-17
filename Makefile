@@ -6,7 +6,7 @@
 #    By: tmaluh <marvin@42.fr>                      +#+  +:+       +#+         #
 #                                                 +#+#+#+#+#+   +#+            #
 #    Created: 2019/06/13 10:24:13 by tmaluh            #+#    #+#              #
-#    Updated: 2019/08/17 13:10:19 by tmaluh           ###   ########.fr        #
+#    Updated: 2019/08/17 13:22:30 by tmaluh           ###   ########.fr        #
 #                                                                              #
 # **************************************************************************** #
 
@@ -18,10 +18,14 @@ NPWD := $(CURDIR)/$(NAME)
 CC := gcc -march=native -mtune=native -Ofast -flto -pipe
 CC_DEBUG := gcc -march=native -mtune=native -g3 -D DEBUG
 CFLAGS := -Wall -Wextra -Werror -Wunused
-IFLAGS := -I $(CURDIR)/includes \
+IFLAGS := -I $(CURDIR)/includes
 
 SRCS := $(abspath $(wildcard srcs/*.c srcs/*/*.c srcs/*/*/*.c))
 OBJ := $(SRCS:.c=.o)
+
+LIBVEC := libs/vectors
+
+IFLAGS += -I $(CURDIR)/$(LIBVEC)
 
 DEL := rm -rf
 
