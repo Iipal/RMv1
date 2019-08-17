@@ -1,9 +1,11 @@
 #include "rmv1.h"
 
+__v4df	lp = { 0.0, -2.0, 0.0, 0.0 };
+
 __v4df	ro = { 0.0, 0.0, -5.0, 0.0 };
 __v4df	rd = { 0.0, 0.0, 1.0, 1.0 };
 
-__v4df	s = { 0.0, 0.0, 0.0, 0.0 };
+__v4df	s = { 0.0, 0.0, 4.0, 0.0 };
 float_t	sr = 1.0f;
 
 uint32_t	g_flags = 0U;
@@ -54,11 +56,17 @@ static Color	ray_march(void)
 
 		if (MIN_HIT_DIST > dist_to_closest)
 		{
-			__v4df	normal = calc_normal(curr_pos);
+			__v4df		normal = calc_normal(curr_pos);
+			__v4df		dir_to_l = v_norm(curr_pos - lp);
+			double_t	diffuse = fmax(0.0, v_dot(normal, dir_to_l));
 			normal = normal * 0.5 + 0.5;
-			return (Color) { .c = { CLR_TO_REAL(X(normal)),
-									CLR_TO_REAL(Y(normal)),
-									CLR_TO_REAL(Z(normal)) } };
+			return sdl_clrs_bright_inc((Color){0x0},
+				(Color){ .c = { CLR_TO_REAL(X(normal)),
+								CLR_TO_REAL(Y(normal)),
+								CLR_TO_REAL(Z(normal))}}, diffuse);
+			// return (Color) { .c = { CLR_TO_REAL(X(normal)),
+									// CLR_TO_REAL(Y(normal)),
+									// CLR_TO_REAL(Z(normal)) } };
 		}
 
 		if (MAX_TRACE_DIST < total_dist)
@@ -117,7 +125,7 @@ static void	render_loop(Environment *restrict const env)
 				else
 					key_press(sdl->e.key.keysym.sym);
 			}
-		SDL_FillRect(sdl->wsurf, NULL, 0xfaf4f2);
+		// SDL_FillRect(sdl->wsurf, NULL, 0xfaf4f2);
 		render_ray_march(sdl);
 		SDL_UpdateWindowSurface(sdl->w);
 		if (IS_BIT(g_flags, OUT_FPS_COUNTER))

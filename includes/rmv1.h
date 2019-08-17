@@ -3,6 +3,7 @@
 
 # include <stdio.h>
 # include <sys/types.h>
+# include <math.h>
 
 # include "libvectors.h"
 # include "libftsdl.h"
@@ -22,6 +23,8 @@
 # define FROM_CANVAS(point, w_size) ((point) * (w_size) / (1000.0 * w_size))
 
 # define STEP_SIZE 0.1f
+
+extern __v4df	lp;  /* represents Light Position */
 
 extern __v4df	ro; /* represents Ray Origin */
 extern __v4df	rd; /* represents Ray Direction */
