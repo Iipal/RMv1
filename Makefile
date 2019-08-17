@@ -6,7 +6,7 @@
 #    By: tmaluh <marvin@42.fr>                      +#+  +:+       +#+         #
 #                                                 +#+#+#+#+#+   +#+            #
 #    Created: 2019/06/13 10:24:13 by tmaluh            #+#    #+#              #
-#    Updated: 2019/08/17 13:22:30 by tmaluh           ###   ########.fr        #
+#    Updated: 2019/08/17 15:45:20 by tmaluh           ###   ########.fr        #
 #                                                                              #
 # **************************************************************************** #
 
@@ -23,9 +23,16 @@ IFLAGS := -I $(CURDIR)/includes
 SRCS := $(abspath $(wildcard srcs/*.c srcs/*/*.c srcs/*/*/*.c))
 OBJ := $(SRCS:.c=.o)
 
-LIBVEC := libs/vectors
+LIBS := -lSDL2 -lSDL2_ttf -lSDL2_image -lm
 
-IFLAGS += -I $(CURDIR)/$(LIBVEC)
+LIBVEC_DIR := libs/vectors
+LIBSDL_DIR := libs/sdl
+
+IFLAGS += -I $(CURDIR)/$(LIBVEC_DIR) \
+		-I $(CURDIR)/$(LIBSDL_DIR)/includes
+
+LIBSDL_MAKE := make -C libs/sdl
+LIBSDL := libs/sdl/libftsdl.a
 
 DEL := rm -rf
 
@@ -45,12 +52,15 @@ $(OBJ): %.o: %.c
 	@$(CC) -c $(CFLAGS) $(LIBSINC) $(IFLAGS) $< -o $@
 	@echo "$(SUCCESS)"
 
+$(LIBSDL):
+	$(LIBSDL_MAKE)
+
 $(BIN_DIR):
 	@mkdir -p bin
 
-$(NAME): $(BIN_DIR) $(OBJ)
+$(NAME): $(BIN_DIR) $(LIBSDL) $(OBJ)
 	@echo -n ' <q.p> | $(NPWD): '
-	@$(CC) $(OBJ) -o $(NAME)
+	@$(CC) $(OBJ) $(LIBS) $(LIBSDL) -o $(NAME)
 	@echo "$(SUCCESS2)"
 
 del:
@@ -68,9 +78,11 @@ debug: set_cc_debug all
 	@echo "$(INVERT)$(NAME) $(GREEN)ready for debug.$(WHITE)"
 
 clean:
+	@$(LIBSDL_MAKE) clean
 	@$(DEL) $(OBJ)
 
 fclean: clean
+	@$(LIBSDL_MAKE) fclean
 	@$(DEL) $(NAME)
 	@echo "$(INVERT)$(RED)deleted$(WHITE)$(INVERT): $(NPWD)$(WHITE)"
 
