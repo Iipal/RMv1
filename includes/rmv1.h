@@ -7,9 +7,9 @@
 # include "libvectors.h"
 # include "libftsdl.h"
 
-# define NUM_OF_STEPS   5000
+# define NUM_OF_STEPS   32
 # define MIN_HIT_DIST   0.001
-# define MAX_TRACE_DIST 1000.0
+# define MAX_TRACE_DIST 100.0
 
 # define WIN_X 1000
 # define WIN_Y 500

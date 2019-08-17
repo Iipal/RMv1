@@ -18,39 +18,68 @@ uint32_t	g_flags = 0U;
  *  positive: outside sphere.
  *  zero:     on the sphere surface.
  */
-float_t	dst_from_sphere(__v4df const p, __v4df const c, float_t const r)
+static inline float_t	dst_from_sphere(__v4df const p,
+										__v4df const c,
+										float_t const r)
 {
 	return v_len(p - c) - r;
 }
 
-Color	ray_march(void)
+static inline __v4df	calc_normal(__v4df const p)
 {
-	float_t	total_dist	= 0.0f;
+	__v4df const	st = { 0.001, 0.0, 0.0, 0.0 };
 
-	for (size_t i = 0; NUM_OF_STEPS > i; ++i) {
-		__v4df	curr_pos = ro + total_dist * rd;
+	__v4df	l = { X(p) - X(st), Y(p) - Y(st), Z(p) - Y(st), 0.0 };
+	__v4df	r = { X(p) + X(st), Y(p) + Y(st), Z(p) + Y(st), 0.0 };
+	float_t	g_x = dst_from_sphere(l, s, sr) - dst_from_sphere(r, s, sr);
+	l = (__v4df){ X(p) - Y(st), Y(p) - X(st), Z(p) - Y(st), 0.0 };
+	r = (__v4df){ X(p) + Y(st), Y(p) + X(st), Z(p) + Y(st), 0.0 };
+	float_t	g_y = dst_from_sphere(l, s, sr) - dst_from_sphere(r, s, sr);
+	l = (__v4df){ X(p) - Y(st), Y(p) - Y(st), Z(p) - X(st), 0.0 };
+	r = (__v4df){ X(p) + Y(st), Y(p) + Y(st), Z(p) + X(st), 0.0 };
+	float_t	g_z = dst_from_sphere(l, s, sr) - dst_from_sphere(r, s, sr);
 
-		float_t	dist_to_closest = dst_from_sphere(curr_pos, s, sr);
+	return v_norm((__v4df){g_x, g_y, g_z, 0.0});
+}
+
+static Color	ray_march(void)
+{
+	__v4df		curr_pos;
+	double_t	total_dist	= 0.0f;
+	double_t	dist_to_closest;
+
+	for (uint16_t i = 0U; NUM_OF_STEPS > i; ++i) {
+		curr_pos = ro + total_dist * rd;
+		dist_to_closest = dst_from_sphere(curr_pos, s, sr);
 
 		if (MIN_HIT_DIST > dist_to_closest)
-			return (Color){ .c = { 255, 128, 0 } };
+		{
+			__v4df	normal = calc_normal(curr_pos);
+			normal = normal * 0.5 + 0.5;
+			return (Color) { .c = { CLR_TO_REAL(X(normal)),
+									CLR_TO_REAL(Y(normal)),
+									CLR_TO_REAL(Z(normal)) } };
+		}
 
 		if (MAX_TRACE_DIST < total_dist)
 			break ;
 
 		total_dist += dist_to_closest;
 	}
-	return (Color){ 0x0 };
+	return (Color){ 0x0U };
 }
 
 static void	render_ray_march(Sdl *restrict const sdl)
 {
 	__v2df	i;
+	__v2df	uv;
+	Color	pxl;
+
 	for (Y(i) = CANVAS_STARTY; CANVAS_ENDY > Y(i); Y(i)++) {
 		for (X(i) = CANVAS_STARTX; CANVAS_ENDX > X(i); X(i)++) {
-			__v2df	uv = { Y(i) / 1000.0, X(i) / 1000.0 };
-			rd = (__v4df){X(uv), Y(uv), 1.0, 0.0};
-			Color	pxl = ray_march();
+			uv = (__v2df){ Y(i) / 1000.0, X(i) / 1000.0 };
+			rd = (__v4df){ X(uv), Y(uv), 1.0, 0.0 };
+			pxl = ray_march();
 			if (pxl.hex)
 				sdl_pixelput(sdl->wsurf,
 					CONVERT_FROM_CANVAS(X(i), Y(i), WIN_X, WIN_Y), pxl);
@@ -92,7 +121,7 @@ static void	render_loop(Environment *restrict const env)
 		render_ray_march(sdl);
 		SDL_UpdateWindowSurface(sdl->w);
 		if (IS_BIT(g_flags, OUT_FPS_COUNTER))
-			printf("ms: %.4f\n", env->fps.res);
+			printf("ms: %.4f\n", env->fps.res * 1000.0f);
 		fps_counter(&env->fps);
 	}
 }
