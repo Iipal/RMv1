@@ -1,4 +1,4 @@
-#include <stdio.h>
+#include "rmv1.h"
 
 int	main(void)
 {
