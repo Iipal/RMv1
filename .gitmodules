@@ -1,0 +1,3 @@
+[submodule "libs/vectors"]
+	path = libs/vectors
+	url = git@github.com:Iipal/libvectors.git
