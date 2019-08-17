@@ -6,11 +6,13 @@
 #    By: tmaluh <marvin@42.fr>                      +#+  +:+       +#+         #
 #                                                 +#+#+#+#+#+   +#+            #
 #    Created: 2019/06/13 10:24:13 by tmaluh            #+#    #+#              #
-#    Updated: 2019/08/14 21:42:21 by tmaluh           ###   ########.fr        #
+#    Updated: 2019/08/17 13:10:19 by tmaluh           ###   ########.fr        #
 #                                                                              #
 # **************************************************************************** #
 
-NAME := bin/name
+BIN_DIR := bin/
+
+NAME := $(BIN_DIR)RMv1
 NPWD := $(CURDIR)/$(NAME)
 
 CC := gcc -march=native -mtune=native -Ofast -flto -pipe
@@ -39,10 +41,10 @@ $(OBJ): %.o: %.c
 	@$(CC) -c $(CFLAGS) $(LIBSINC) $(IFLAGS) $< -o $@
 	@echo "$(SUCCESS)"
 
-bin_dir:
+$(BIN_DIR):
 	@mkdir -p bin
 
-$(NAME): bin_dir $(OBJ)
+$(NAME): $(BIN_DIR) $(OBJ)
 	@echo -n ' <q.p> | $(NPWD): '
 	@$(CC) $(OBJ) -o $(NAME)
 	@echo "$(SUCCESS2)"
